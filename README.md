@@ -1,8 +1,8 @@
 ## Realtime Check Scripts
-This is a collection of scripts for diagnosing realtime linux environments
+This is a collection of scripts for diagnosing real-time Linux environments. Tested for kernel version 5.10.
 
 ### Requirements
-For the scripts to work the following programs need to be present
+Before running the scripts, be sure the following packages are installed in the system:
 * `bash`
 * `gnu coreutils` or equivalent (eg. busybox or toybox)
 * `sed`
@@ -11,10 +11,10 @@ For the scripts to work the following programs need to be present
 * `procps`
 
 #### rtsyscheck
-Checks if the system is configured correctly for RT
+This script checks if the system is configured correctly for RT. It does not require any special parameter.
 
 #### rtps
-simple ps-like program to list RT applications
+Simple ps-like program to list RT applications.
 ```
 Syntax: rtps [-k] [-f|-r|-b|-i|-d]
 
