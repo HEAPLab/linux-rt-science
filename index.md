@@ -16,3 +16,13 @@ Reghenzani, F., Massari, G., & Fornaciari, W. (2019). The real-time linux kernel
 PREEMPT_RT. ACM Computing Surveys (CSUR), 52(1), 1-36.
 ([official link](https://dl.acm.org/doi/abs/10.1145/3297714),
 [open-access version](https://re.public.polimi.it/handle/11311/1076057#.YB0SlnWYWV4))
+
+
+### License and authors
+<small>
+Copyright (c) 2021 Federico Reghenzani ([personal website](https://reghenzani.faculty.polimi.it/), [lab website](http://heaplab.deib.polimi.it/)).
+Permission is granted to copy, distribute and/or modify this document under the terms of the **GNU
+Free Documentation License**, Version 1.3 or any later version published by the Free Software
+Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of the
+license is included in the section entitled [GNU Free Documentation License](https://raw.githubusercontent.com/HEAPLab/linux-rt-science/gh-pages/LICENSE).
+</small>

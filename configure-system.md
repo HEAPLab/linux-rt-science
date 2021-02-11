@@ -1,8 +1,3 @@
----
-layout: page
-title: "Configuring the system"
----
-
 [Back to Index](./)
 
 ## Configuring the system
