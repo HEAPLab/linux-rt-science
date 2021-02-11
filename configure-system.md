@@ -128,6 +128,49 @@ are relevant for the real-time workload:
 All the others `sched_*` options are related to CFS and not affecting real-time workload.
 
 ### Governors
+Most of all the processors that run Linux nowadays are capable of scaling the frequency and the
+voltage (DVFS) to control the power consumption. The frequency choice impacts on the execution time,
+and thus on your real-time performance. In Linux, DVFS is managed via the `cpufreq` kernel module,
+which allows the system administrator to select a _governor_ (i.e., a power management policy) for
+each `cpufreq` domain (usually, per-core). The most common governors supported by almost all the
+platforms are:
+- `performance`: the CPU runs always at the maximum frequency, regardless of the system load
+- `powersaving`: the CPU runs always at the minimum frequency, regardless of the system load
+- `userspace`:   the CPU runs always at the frequency selected by the user, regardless of the system
+  load
+- `ondemand`, `conservative`, `schedutil`: the CPU runs at a frequency which depends on the current
+  and past system load. Please check the [kernel documentation](https://www.kernel.org/doc/Documentation/cpu-freq/governors.txt)
+  for further details. These modes are very effective in the general case, but they are discouraged
+  for real-time workload, because they make the execution time unpredictable.
+
+According to the goal of your analysis, the cpu governors (and the frequency if need be) must be
+properly set. If the power/energy is not an objective of your analysis, the best choice is usually
+the `performance` governor (however, but pay attention to the thermal effects and throttling, see
+the next section). The governor is set via sysfs:
+```bash
+# echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+```
+Be sure to properly set the required parameters of `cpufre` of all of your CPUs before beginning
+the experiment.
+
+#### Hardware throttling
+Most of all CPUs implement a hardware throttling of the frequency when the core temperature reaches
+a predefined threshold. The frequency is reduced regardless of the governor setting to avoid
+hardware damage. Usually, you have no way to control this mechanism (in some chip, you can set
+the threshold). Thermal throttling happens frequently when your CPU runs heavy workload with the
+governor set to `performance`. To keep the thermal throttling controlled you can implement one or
+more of the following solutions:
+1. Improve the cooling of your CPU to avoid the thermal throttling by design
+2. Change the governor to `powersave` or `userspace` and set a lower frequency
+3. Check if a thermal throttle occurs and take action (e.g., you re-run your experiment). To do
+   this, you can exploit the files under the sysfs directory
+   `/sys/devices/system/cpu/cpu*/thermal_throttle/`, which provide you the number of throttling
+   events.
+
+Checking the (non-)happening of the thermal throttling (solution 3.) is, in any case, strongly
+suggested, in order to ensure the experiment validity.
+
+#### DPM overheads
 
 ### Interrupts
 
