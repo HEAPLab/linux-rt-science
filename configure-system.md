@@ -1,4 +1,4 @@
-##Configuring the system
+## Configuring the system
 
 This page shows the steps to perform to prepare the system to run the real-time applications with
 the lowest possible latency and intereference. You can also check [our script](./resources) to
@@ -22,33 +22,38 @@ good small guide for Ubuntu (but can be used for any distribution).
 ### The kernel configuration parameters you should check
 Besides the `CONFIG_PREEMPT_RT` (or `CONFIG_PREEMPT_RT_FULL` in some kernel versions) that is
 necessary to enable the kernel patch, you should check or set these variables:
-- `CONFIG_GENERIC_IRQ_MIGRATION=y`: this option enables the migration of interrupt routines to other
-  cpus
-- `CONFIG_IRQ_FORCED_THREADING=y`: it enables the threaded IRQs, to reduce the time spent in
+- IRQ-related
+  - `CONFIG_GENERIC_IRQ_MIGRATION=y`: this option enables the migration of interrupt routines to other
+    cpus
+  - `CONFIG_IRQ_FORCED_THREADING=y`: it enables the threaded IRQs, to reduce the time spent in
   critical sections having interrupts disabled.
-- `CONFIG_HZ_PERIODIC=n`: a periodic HZ clock may cause periodic spurious latencies
-- `CONFIG_NO_HZ_IDLE=n`:  the HZ clock should be disabled when the cpu is idle
-- `CONFIG_NO_HZ_FULL=n`:  (optional) it completely disables the HZ clock on the selected cpu even
-  when tasks are running (for the CPU in the nohz_full at command line). This option should be
-  careful set: disabling the HZ clock prevents the scheduler to preempt a task when its time slice
-  is expired. A general suggestion is: keep this option disabled if you have a single task per-cpu,
-  otherwise leave it on.
-- `CONFIG_HZ`: According to the previous options, set the periodic timer interval (in Hz)
+- Timers
+  - `CONFIG_HZ_PERIODIC=n`: a periodic HZ clock may cause periodic spurious latencies
+  - `CONFIG_NO_HZ_IDLE=y/n`: the HZ clock should be disabled when the cpu is idle, unless you select
+    the next option:
+  - `CONFIG_NO_HZ_FULL=y/n`: it completely disables the HZ clock on the selected cpu even
+    when tasks are running (for the CPU in the nohz_full at command line). This option should be
+    careful set: disabling the HZ clock prevents the scheduler to preempt a task when its time slice
+    is expired. A general suggestion is: keep this option disabled if you have a single task per-cpu,
+    otherwise leave it on.
+  - `CONFIG_HZ`: According to the previous options, set the periodic timer interval (in Hz)
+- RCU subsystem
+  - `CONFIG_RCU_NOCB_CPU=n`: it enables the offloading of RCU callbacks to CPU running non-time
+    critical workload.
+  - `CONFIG_RCU_NOCB_CPU_NONE=n` and `CONFIG_RCU_NOCB_CPU_ALL=y`: set all CPU as NOCB. Note: the
+    `CONFIG_RCU_NOCB_CPU_ALL` option has been removed since kernel version 4.12, for newer kernel is
+    not necessarily to set it, but you have to set the kernel boot parameter (see later)
+  - `CONFIG_PREEMPT_RCU=y`: it enables the preemption of RCU routines.
+- Other options
+  - `CONFIG_HOTPLUG_CPU=y`: (optional) this is not stricly necessary for real-time, but it allows you to enable
+    and disable cpu at run-time, which is usually very useful during experiments.
+  - `CONFIG_HIGH_RES_TIMERS=y`: (optional)  it enables the high resolution timers (if available in
+    hardware). This is important when clock_gettime (and other time-related OS syscall like sleeps)
+    are used.
+  - `CONFIG_PREEMPT_NOTIFIERS=y`: (optional) it enables a set of callback for the debugging of
+    scheduler and latencies.
 
-- `CONFIG_RCU_NOCB_CPU=n`: it enables the offloading of RCU callbacks to CPU running non-time
-  critical workload.
-- `CONFIG_RCU_NOCB_CPU_NONE=n` and `CONFIG_RCU_NOCB_CPU_ALL=y`: set all CPU as NOCB.
-- `CONFIG_PREEMPT_RCU=y`: it enables the preemption of RCU routines.
-    
-- `CONFIG_HOTPLUG_CPU=y`: (optional) this is not stricly necessary for real-time, but it allows you to enable
-   and disable cpu at run-time, which is usually very useful during experiments.
-- `CONFIG_HIGH_RES_TIMERS=y`: (optional)  it enables the high resolution timers (if available in
-  hardware). This is important when clock_gettime (and other time-related OS syscall like sleeps)
-  are used.
-- `CONFIG_PREEMPT_NOTIFIERS=y`: (optional) it enables a set of callback for the debugging of
-  scheduler and latencies.
-
-### Command line parameters
+### Command line boot parameters
 The bootloader provides to Linux a set of command line parameters. According to the previous
 configurations, the interesting ones for real-time purposes are:
 - `quiet`: this parameter disables most log messages from the kernel which may cause spurious latencies
@@ -63,17 +68,24 @@ configurations, the interesting ones for real-time purposes are:
 
 ### Other configurations
 - To reduce the latencies, if you do not need it, you can disable the watchdog and the NMI watchdog:
-`# echo 0 > /proc/sys/kernel/watchdog`
-`# echo 0 > /proc/sys/kernel/nmi_watchdog`
+```
+# echo 0 > /proc/sys/kernel/watchdog
+# echo 0 > /proc/sys/kernel/nmi_watchdog
+```
 
-To make these actions permanent, you can edit the `/etc/sysctl.conf` file by adding:
-`kernel.watchdog=0`
-`kernel.nmi_watchdog=0`
+To make these actions permanent, you can edit the `/etc/sysctl.conf` file (or, in newer kernel,
+create a new file in the directory `/etc/sysctl.d/`) adding:
+```
+kernel.watchdog=0
+kernel.nmi_watchdog=0
+```
 
 - The `ftrace` kernel module is very useful kernel feature for debugging, but it can be the cause of
   very high latencies. To disable it, you can set the `/proc/sys/kernel/ftrace_enabled` to zero or
   edit the `/etc/sysctl.conf` file by adding:
-`kernel.ftrace_enabled=0`
+```
+kernel.ftrace_enabled=0
+```
 
 - Be sure that the kernel verbosity level is not too high (it should at least be < 4) by setting
   the relative sysfs file: `/proc/sys/kernel/printk` or the relative option in `/etc/sysctl.conf`
@@ -81,7 +93,39 @@ To make these actions permanent, you can edit the `/etc/sysctl.conf` file by add
 - Correctly configure the vmstat interval in `/proc/sys/vm/stat_interval`, which is the updater for
   the kernel statistics. Using an high value is suggested (> 60) to reduce the interferences.
 
-### Scheduler and CGroups
+### Schedulers and CGroups
+#### Schedulers
+The tasks run by Linux are scheduled according to the assigned _scheduling policies_. Multiple
+schedulers exist in the system, in particular:
+- The [CFS scheduler](https://en.wikipedia.org/wiki/Completely_Fair_Scheduler) which schedules the
+  tasks with classes `SCHED_OTHER`, `SCHED_IDLE`, and `SCHED_BATCH`. These policies are non
+  real-time, so we do not describe them further.
+- A FIFO scheduler, for tasks with `SCHED_FIFO` policy
+- A Round Robin scheduler, for tasks with `SCHED_RR` policy
+- An EDF scheduler, for tasks with `SCHED_DEADLINE` policy
+
+The last three policies are dedicated to the real-time workload. Check the [man page](https://man7.org/linux/man-pages/man7/sched.7.html)
+for a detailed description of these modes. How to change the application policy is described in the
+next chapter [Configure real-time applications](./configure-apps).
+
+From the system standpoint, some special files in procfs (in particular under `/proc/sys/kernel/`)
+are relevant for the real-time workload:
+- `sched_deadline_period_min_us` and `sched_deadline_period_max_us`
+  allow you to set the minimum and maximum period possible for tasks set as `SCHED_DEADLINE`
+- `sched_nr_migrate`: this is a paramter of CFS, but it has a side-impact on
+  real-time tasks if this value is high and your system runs many non-real-time tasks. Lower this
+  value to 2 to reduce the interference of CFS tasks to real-time tasks ([see here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_for_real_time/7/html/tuning_guide/using_sched_nr_migrate_to_limit_sched_other_task_migration.) 
+  for further details)
+- `sched_rr_timeslice_ms` this is the timeslice (quantum) for RR tasks.
+- `sched_rt_runtime_us` / `sched_rt_period_us`: respectively the amount of time to reserve to
+  real-time workload over a period. If `sched_rt_runtime_us` is set to -1, no limits are applied to
+  real-time workload (warning: your system may become unresponsive due to a spinning real-time
+  workload)
+- `sched_schedstats`: enable (1) or disable (0) the scheduler statistics generation (you can use the
+  `perf` tool to read the statistics). If enabled, it adds a small overhead to the scheduler
+  routines.
+
+All the others `sched_*` options are related to CFS and not affecting real-time workload.
 
 ### Governors
 
