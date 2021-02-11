@@ -173,6 +173,17 @@ Checking the (non-)happening of the thermal throttling (solution 3.) is, in any 
 suggested, in order to ensure the experiment validity.
 
 #### DPM overheads
+Similarly to DVFS, the Dynamic Power Management (DPM) is used to reduce the power consumption.
+DPM puts the core in a power-saving state when a cpu core is in idle. In general, there exists
+multiple power-saving states. Each one is characterized by a power consumption and an overhead,
+i.e., the required time to restore the non-idle state. The higher the number of the state, the
+smaller the power consumption, but the larger the overhead. In some architectures this overhead can
+be in the order of milliseconds, this is why it is important to check (and set) the DPM state.
+
+DPM can be configured via `sysfs` by exploiting `cpuidle` by reading/writing the files in the
+directory `/sys/devices/system/cpu/cpu*/cpudile/`. You can disable all the non-polling states by
+setting the relative file `disable` to 1.
+
 
 ### Interrupts
 
