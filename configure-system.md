@@ -1,3 +1,10 @@
+---
+layout: page
+title: "Configuring the system"
+---
+
+[Back to Index](./)
+
 ## Configuring the system
 
 This page shows the steps to perform to prepare the system to run the real-time applications with
@@ -174,4 +181,6 @@ suggested, in order to ensure the experiment validity.
 
 ### Interrupts
 
+
+[Back to Index](./)
 

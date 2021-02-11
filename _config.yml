@@ -1,1 +1,10 @@
 theme: jekyll-theme-slate
+show_downloads: false
+google_analytics: G-C67RTSHDDF
+
+description: PREEMPT_RT Linux in scientific applications
+
+
+plugins:
+  - jemoji
+

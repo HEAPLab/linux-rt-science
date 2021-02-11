@@ -1,7 +1,6 @@
 ## Real-time Linux in scientific applications
 
-> :warning: **This website in under construction.**: Information may be inaccurate
-
+> :warning: **This website in under construction.** Information may be inaccurate :warning:
 
 
 
