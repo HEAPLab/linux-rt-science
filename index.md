@@ -12,7 +12,7 @@
 5. [Scripts and other resources](./resources)
 
 ### References
-<p style="font-size:11px;">
+<p style="font-size:12px;" markdown="1">
 Reghenzani, F., Massari, G., & Fornaciari, W. (2019). The real-time linux kernel: A survey on
 PREEMPT_RT. ACM Computing Surveys (CSUR), 52(1), 1-36.
 ([official link](https://dl.acm.org/doi/abs/10.1145/3297714),
@@ -20,7 +20,7 @@ PREEMPT_RT. ACM Computing Surveys (CSUR), 52(1), 1-36.
 </p>
 
 ### License and authors
-<p style="font-size:11px;">
+<p style="font-size:12px; text-align:justify;" markdown="1">
 Copyright (c) 2021 Federico Reghenzani ([personal website](https://reghenzani.faculty.polimi.it/), [lab website](http://heaplab.deib.polimi.it/)).
 Permission is granted to copy, distribute and/or modify this document under the terms of the **GNU
 Free Documentation License**, Version 1.3 or any later version published by the Free Software
