@@ -15,8 +15,13 @@ further information.
 The scripts are released under the [Apache License 2.0](https://github.com/HEAPLab/linux-rt-science/blob/main/LICENSE). 
 
 ### External resources
+- [Real-Time Linux Wiki](https://wiki.linuxfoundation.org/realtime/start)
+- [Old RTWiki](https://rt.wiki.kernel.org/index.php/Main_Page) (it still contains useful information)
 - [Real-Time Linux for Dummies](http://www.mate.tue.nl/mate/pdfs/10018.pdf), by Jeroen de Best, Roel Merry, 2009
 
+### Links
+- [Official repository of the PREEMPT_RT patch](https://mirrors.edge.kernel.org/pub/linux/kernel/projects/rt/)
+ 
 
 [Back to Index](./)
 
