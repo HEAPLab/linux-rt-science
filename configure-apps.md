@@ -26,7 +26,7 @@ To configure an application to run in real-time you have to perform the followin
 
 #### Configure via C interface
 
-##### Scheduler policy and priority
+##### 1. Scheduler policy and priority
 To set the scheduler policy and priority of the current thread in C, you can run the following code:
 ```c
 struct sched_param schd;
@@ -43,7 +43,7 @@ for further details of the parameters.
 If you are using `SCHED_DEADLINE` check the [sched_setattr() documentation](https://man7.org/linux/man-pages/man2/sched_setattr.2.html)
 to learn how to configure period, deadline, etc.
 
-##### CPU affinity
+##### 2. CPU affinity
 The CPU affinity allows you to specify on which CPU you would like to run your thread. For a
 real-time application, you should set the cores you have indicated as `isolcpus` in the
 [previous step](./configure-system). You can specify one or more CPU ids. However, if you specify
@@ -62,7 +62,7 @@ sched_setaffinity(0, sizeof(set), &set);
 Please check the [related documentation](https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html)
 for further details of the parameters.
 
-##### Lock the memory
+##### 3. Lock the memory
 To prevent Linux to swap-out your memory causing extremely high latency, it is important that you
 lock the memory of your process:
 
@@ -75,7 +75,39 @@ You do not have to run this function per-thread, because it is a per-process fla
 details of the parameters.
 
 #### Configure via shell commands
+Alternatively to the C functions, it is possible to use the shell commands briefly described in this
+section.
 
+##### 1. Scheduler policy and priority
+To change the priority and scheduling policy of a running thread or to start a new process with
+a given priority and scheduling policy you can use the `chrt` command:
+```bash
+$ chrt [options] priority command [argument ...]
+$ chrt [options] -p [priority] pid
+```
+where `options` can be:
+- `-b`, `-o`, `-i`: for non-real-time policies
+- `-d`: for `SCHED_DEADLINE` class
+- `-f`: for `SCHED_FIFO` class
+- `-r`: for `SCHED_RR` class
+
+Please check the [related documentation](https://man7.org/linux/man-pages/man1/chrt.1.html) for
+further details of the parameters.
+
+##### 2. CPU affinity
+To set the affinity of the tasks, you can use the `taskset` command:
+```bash
+$ taskset cpulist command [argument ...]
+$ taskset -c cpulist pid
+```
+
+Please check the [related documentation](https://man7.org/linux/man-pages/man1/taskset.1.html) for
+further details of the parameters.
+
+##### 3. Lock the memory
+Unfortunately, it is not possible to call `mlockall` from one process to another process, thus no
+command line tool exists to lock the memory. The real-time task has to invoke the system call via
+the C api.
 
 
 [Back to Index](./)
